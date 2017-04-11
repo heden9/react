@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<style>
+    .red {
+        color: red;
+    }
+
+</style>
+
+<body>
+    <div id="apple"></div>
+    <div id="red"></div>
+    <script src="react-15.3.1/build/react.min.js"></script>
+    <script src="react-15.3.1/build/react-dom.min.js"></script>
+    <script src="react-15.3.1/browser.min.js"></script>
+    <script type="text/babel">
+        var Banner = React.createClass({
+            clickHander: function(){
+//                方法一
+//                this.state.count++;
+//                this.forceUpdate();
+//                方法二
+                this.setState({
+                   count: this.state.count + 1 
+                });
+            },
+//            设置初始状态
+            getInitialState: function(){
+                return{
+                    count: 0
+                };
+            },
+            render: function(){
+                var msg = [];
+                this.props.arr.forEach(function(elem, index){
+                   msg.push(<div key={index}>{elem}</div>);
+                });
+                return (
+                    <div>
+                        <button onClick={this.clickHander}>{this.props.str}</button>
+                        <span>{this.state.count}</span>
+                        <span>{msg}</span>
+                    </div>
+                );
+            } 
+        });
+        var Apple = React.createClass({
+            render: function(){
+                var data = "123123";
+                var arr = [1,2,3]
+                return(
+                    <Banner str={data} arr={arr}/>
+                );
+            }   
+        });
+        ReactDOM.render(
+            <Apple/>,
+            document.getElementById("apple")
+        );
+        var Orange = React.createClass({
+            getInitialState: function(){
+               return{
+                 username: "c"  
+               };
+            },
+            changeHandler: function(e){
+                this.setState({
+                  username : e.target.value
+                });
+            },
+            render: function(){
+              return (
+                  <div>
+                      <input type="text" value = {this.state.username} onChange={this.changeHandler}/>
+                      <h1>{this.state.username}</h1>
+                  </div>
+              );  
+            },
+        });
+        ReactDOM.render(
+            <Orange/>,
+            document.getElementById('red')
+        );
+    </script>
+</body>
+
+</html>
