@@ -20,6 +20,29 @@
     <script src="react-15.3.1/browser.min.js"></script>
     <script type="text/babel">
         var Banner = React.createClass({
+            getInitialState: function(){
+                console.log("getInitialState");
+                return{
+                    count: 0,
+                    timer: null
+                };
+            },
+            getDefaultProps: function(){
+                console.log("getDefaultProps");  
+            },
+            componentWillMount: function(){
+                var that = this;
+                console.log("componentWillMount");
+                this.timer = setInterval(function(){
+                    that.setState({
+                       count: that.state.count + 1 
+                    });
+                },1000);
+//                }.bind(this),1000);
+            },
+            componentDidMount: function(){
+                console.log("componentDidMount"); 
+            },
             clickHander: function(){
 //                方法一
 //                this.state.count++;
@@ -29,13 +52,30 @@
                    count: this.state.count + 1 
                 });
             },
+            shouldComponentUpdate: function(){
+                console.log("shouleComponentUpadte");
+                if(this.state.count < 5)
+                    return true;
+                else
+                    return false;
+            },
+            componentWillUpdate: function(){
+                console.log("componentWillUpdate");  
+            },
+            componentDidUpdate: function(){
+                console.log("componentDidUpdate");  
+            },
 //            设置初始状态
-            getInitialState: function(){
-                return{
-                    count: 0
-                };
+            destroyComponent: function(){    
+                ReactDOM.unmountComponentAtNode(document.getElementById("apple"));
+                
+            },
+            componentWillUnmount: function(){
+                console.log(this.timer);
+                clearInterval(this.timer);
             },
             render: function(){
+                console.log("render");
                 var msg = [];
                 this.props.arr.forEach(function(elem, index){
                    msg.push(<div key={index}>{elem}</div>);
@@ -45,6 +85,7 @@
                         <button onClick={this.clickHander}>{this.props.str}</button>
                         <span>{this.state.count}</span>
                         <span>{msg}</span>
+                        <button onClick={this.destroyComponent}>销毁组件</button>
                     </div>
                 );
             } 
@@ -68,7 +109,7 @@
                  username: "c"  
                };
             },
-            changeHandler: function(e){
+            change: function(e){
                 this.setState({
                   username : e.target.value
                 });
@@ -76,14 +117,86 @@
             render: function(){
               return (
                   <div>
-                      <input type="text" value = {this.state.username} onChange={this.changeHandler}/>
+                      <input type="text" value = {this.state.username} onChange={this.change}/>
                       <h1>{this.state.username}</h1>
                   </div>
               );  
             },
         });
+        var Water = React.createClass({
+            getDefaultProps: function(){
+                  
+            },
+            getInitialState: function(){
+                return{
+                    username: "",
+                    password: "",
+                    sex: "",
+                    school: ""
+                };
+            },
+            usernamechange: function(e){
+                this.setState({
+                   username: e.target.value 
+                });
+            },
+            passwordchange: function(e){
+                this.setState({
+                   password: e.target.value 
+                });
+            },
+            submitHandler: function(e){
+                console.log({
+                    username:this.state.username,
+                    password:this.state.password,
+                });
+                this.props.counter();
+                e.preventDefault();
+            },
+            render: function(){
+                return (
+                 <form action="" onSubmit={this.submitHandler}>
+                     <p>用户名<input type="text" onChange={this.usernamechange}/></p>
+                     <p>密码<input type="password" onChange={this.passwordchange}/></p>
+                     <p>
+                        性别
+                        <input type="radio" value="男" name="sex"/>
+                        <input type="radio" value="女" name="sex"/>
+                     </p>
+                     <p>
+                         <select name="" id="">
+                             <option value="黑大">黑大</option>
+                             <option value="林大">林大</option>
+                             <option value="理工">理工</option>
+                         </select>
+                     </p>
+                     <input type="submit"/>
+                 </form>
+             );  
+           },
+        });
+        var Pond = React.createClass({
+            getInitialState: function(){
+                return {
+                    count: 0 
+                };  
+            },
+            counter: function(){
+                this.setState({
+                    count: this.state.count + 1 
+                });
+            },
+            render: function(){
+                return (
+                    <div>
+                        <Water counter={this.counter}/>
+                        <p>{this.state.count}</p>
+                    </div>
+                );  
+            },
+        });
         ReactDOM.render(
-            <Orange/>,
+            <Pond/>,
             document.getElementById('red')
         );
     </script>
