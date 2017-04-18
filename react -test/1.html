@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<style>
+    body{
+        height: 1000px;
+    }    
+</style>
+<body>
+    <canvas id="drawing"></canvas>
+    <canvas id="drawing2"></canvas>
+    <script src="jquery-2.1.1.min.js"></script>
+    <script>
+        $(function() {
+            var flag = false;
+            $(window).on('scroll', function() {
+                    console.log("window");
+                    console.log($(document).height()-$(window).height());
+                    console.log($(window).scrollTop());
+                if ($(this).scrollTop() >= 300 && !flag) {
+                    flag = true;
+//                    console.log(123);
+                    fillball("drawing", 60, "greenyellow");
+                    fillball("drawing2", 40, "red");
+//                    fillball("drawing3", 80, "blue");
+//                    fillball("drawing4", 99, "pink");
+//                    fillball("drawing5", 50, "red");
+//                    fillball("drawing6", 30, "#000000");
+//                    fillball("drawing7", 40, "yellow");
+//                    fillball("drawing8", 69, "orange");
+                }
+
+            });
+
+        });
+//        fillball("drawing", 60, "greenyellow");
+//        fillball("drawing2", 40, "red");
+//        fillball("drawing3", 80, "blue");
+//        fillball("drawing4", 99, "pink");
+//        fillball("drawing5", 50, "red");
+//        fillball("drawing6", 30, "#000000");
+//        fillball("drawing7", 40, "yellow");
+//        fillball("drawing8", 69, "orange");
+
+        function fillball(id, value, color) {
+            var canvas = document.getElementById(id);
+            var width = canvas.width = 160;
+            var height = canvas.height = 160;
+            var count = 0;
+            linewidth = 5;
+            var interval = 4000 / value;
+            R = (width - 2 * linewidth) / 2;
+            var context = canvas.getContext('2d');
+
+            function render(context) {
+
+                context.clearRect(0, 0, width, height);
+                context.beginPath();
+                context.lineWidth = linewidth;
+                context.strokeStyle = "#eee";
+                context.arc(1 / 2 * width, 1 / 2 * height, R, 0, 2 * Math.PI);
+                context.stroke();
+                context.closePath();
+                context.strokeStyle = color;
+                context.beginPath();
+                context.arc(1 / 2 * width, 1 / 2 * height, R, Math.PI / 2 - (count * 2 * Math.PI) / 200, Math.PI / 2 + (count * 2 * Math.PI) / 200)
+
+                context.stroke()
+
+                context.font = "bold 20px sans-serif"; // 字体大小，样式
+                context.fillStyle = color; // 颜色
+                context.textAlign = 'center'; // 位置
+                //       context.textBaseline = 'middle';
+                context.fillText(count + "%", 1 / 2 * width, 1 / 2 * height);
+                if (count < value)
+                    count++;
+            }
+            setInterval(function() {
+                render(context);
+            }, interval);
+
+        }
+
+        function fillball(id, value, color) {
+            var oCvs = document.getElementById(id);
+
+            var width = oCvs.width = 300;
+            var height = oCvs.height = 300;
+            var R = 100;
+            var count = 0;
+            var e = 4000;
+            var lineWidth = 5;
+            var context = oCvs.getContext('2d');
+
+            function render(context) {
+
+                context.strokeStyle = color;
+                context.clearRect(0, 0, width, height);
+                context.beginPath();
+                context.lineWidth = lineWidth;
+                context.strokeStyle = "#eee";
+                context.arc(1 / 2 * width, 1 / 2 * height, R, 0, 2 * Math.PI);
+                context.stroke();
+                context.closePath();
+                context.strokeStyle = color;
+                context.beginPath();
+                context.arc(1 / 2 * width, 1 / 2 * height, R, Math.PI / 2 - (count * 2 * Math.PI) / 200, Math.PI / 2 + (count * 2 * Math.PI) / 200)
+                context.stroke()
+
+                context.fillStyle = color;
+                if (count < value)
+                    count++;
+                else
+                    clearInterval(timer);
+            }
+            var timer = setInterval(function() {
+                count++;
+                render(context);
+
+            }, e / value);
+
+
+
+        }
+    </script>
+</body>
+</html>
+
+
+
+
