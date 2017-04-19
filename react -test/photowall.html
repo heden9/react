@@ -52,8 +52,21 @@
     <div id="stage"></div>
     <script src="react-15.3.1/build/react.min.js"></script>
     <script src="react-15.3.1/build/react-dom.min.js"></script>
-    <script src="react-15.3.1/browser.min.js"></script>
-    <script src="photo.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script>
+        var PhotoInfo = [
+        {"Url":"../img/m1.jpg","Des":"People_1","Inv":"People_12"},
+        {"Url":"../img/m2.jpg","Des":"People_2","Inv":"People_22"},
+        {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
+        {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
+        {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
+        {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
+        {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
+        {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
+        {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
+        {"Url":"../img/m4.jpg","Des":"People_4","Inv":"People_42"}
+    ];
+    </script>
     <script type="text/babel">
     var Photo = React.createClass({
         getInitialState: function(){
