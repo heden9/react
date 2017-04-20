@@ -8,21 +8,27 @@
             margin: 0;
             padding: 0;
         }
+        body{
+            height: 100%;
+        }
+        html{
+            height: 100%;
+        }
         #stage{
             position: relative;
-            background: red;
+            background-color: deepskyblue;
             width: 100%;
-            height: 1000px;
+            height: 100%;
             perspective: 1000px;
         }
         .photo-module{
             position: absolute;
-            left: 0;
-            top: 0;
+            box-sizing: border-box;
+            width: 280px;
+            height: 340px;
+            padding-top: 20px;
             text-align: center;
-            display: inline-block;
             background: #eee;
-            padding: 10px 20px;
             transform-style: preserve-3d;
             transition: all 1s ease-in-out;
         }
@@ -71,25 +77,22 @@
     var Photo = React.createClass({
         getInitialState: function(){
             return{
-                transform: "rotate("+getRandom(0,180)+")",
-                top: getRandom(100,300),
-                left: getRandom(100,1000),
-                nowState: true
+                transform: null,
+                x: 0,
+                y: 0,
+                nowState: true,
+                timer: null
             };
         },
-        clickHandle: function(){
-            var nowState = !this.state.nowState;
-            this.setState({
-              nowState: nowState
-            });
-        },
         render: function(){
-            var style = {
-                top: this.state.top,
-                left: this.state.left
-            }
+            console.log(this.props.PositionInfo);
+//            var style = {
+//                transform: this.state.transform,
+//                top: this.state.top,
+//                left: this.state.left
+//            }
             return(
-                <div className={this.state.nowState ? "photo-module on":"photo-module in"} onClick={this.clickHandle} style={style}>
+                <div className={this.state.nowState ? "photo-module on":"photo-module in"} onClick={this.clickHandle} style={this.props.PositionInfo} >
                     <h3 className="inverse">{this.props.info["Inv"]}</h3> 
                     <img src={this.props.info["Url"]}></img>
                     <h3>{this.props.info["Des"]}</h3>
@@ -98,23 +101,44 @@
         }
     });
     var PhotoWall = React.createClass({
+        getInitialState: function(){
+            return{
+                ImgPosInfo : []
+            };
+        },
+        clickHandle: function(){
+            this.setState({
+                transform: null,
+                nowState: !this.state.nowState
+            });
+        },
+        componentDidMount: function(){
+            var mi = ReactDOM.findDOMNode(this.refs.Img);
+            
+        },
         render: function(){
             var msg = [];
-            PhotoInfo.forEach(function(elem,index){
-                msg.push(<Photo info={elem} key={index}/>);
-            });
+            console.log("执行啦");
+            PhotoInfo.forEach(function(elem,index){ 
+                this.state.ImgPosInfo[index] = {
+                    transform: null,
+                    left: getRandom(10,500),
+                    top: getRandom(10,200)
+                };
+                msg.push(<Photo info={elem} key={index} ref = "Img" PositionInfo={this.state.ImgPosInfo[index]} onClick={this.clickHandle}/>);
+            }.bind(this));
             return(
                 <div>{msg}</div>
             );
         }
     });
-function getRandom(a,b){;
-    return Math.floor(Math.random()*(b-a)) + a;
-}
-ReactDOM.render(
-    <PhotoWall/>,
-    document.getElementById("stage")
-);
+    function getRandom(a,b){;
+        return Math.floor(Math.random()*(b-a)) + a;
+    }
+    ReactDOM.render(
+        <PhotoWall/>,
+        document.getElementById("stage")
+    );
     </script>
 </body>
 </html>
