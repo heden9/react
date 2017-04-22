@@ -15,6 +15,7 @@
             height: 100%;
         }
         #stage{
+            overflow: hidden;
             position: relative;
             background-color: deepskyblue;
             width: 100%;
@@ -23,6 +24,8 @@
         }
         .photo-module{
             position: absolute;
+            left: 0;
+            top: 0;
             box-sizing: border-box;
             width: 280px;
             height: 340px;
@@ -30,7 +33,7 @@
             text-align: center;
             background: #eee;
             transform-style: preserve-3d;
-            transition: all 1s ease-in-out;
+            transition: all 1s ease-out;
         }
         .on{
             transform: rotateY(0deg);
@@ -56,6 +59,14 @@
 </head>
 <body>
     <div id="stage"></div>
+    <div id="header"></div>
+    <div id="content">
+        <h1 class="title"></h1>
+        <img src="" alt="">
+        <p></p>
+    </div>
+    <div id="footer"></div>
+    
     <script src="react-15.3.1/build/react.min.js"></script>
     <script src="react-15.3.1/build/react-dom.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
@@ -70,32 +81,59 @@
         {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
         {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
         {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
+        {"Url":"../img/m3.jpg","Des":"People_3","Inv":"People_32"},
         {"Url":"../img/m4.jpg","Des":"People_4","Inv":"People_42"}
     ];
     </script>
     <script type="text/babel">
+    var stageW = document.getElementById("stage").offsetWidth;
+    var stageH = document.getElementById("stage").offsetHeight;
     var Photo = React.createClass({
         getInitialState: function(){
             return{
-                transform: null,
-                x: 0,
-                y: 0,
-                nowState: true,
-                timer: null
+                Value: 0  
             };
         },
+        componentDidMount: function(){
+           
+        },
+        clickHandle: function(event){
+            this.props.clickFun(this.props["data-key"]);
+            this.refs.Input.focus();
+            
+        },
+        changeHandle: function(event){
+            this.setState({
+               Value: event.target.value
+            },function(){
+                console.log(this.refs.Input.value);
+            });
+        },
+        stopProp: function(event){
+            event.stopPropagation();
+        },
         render: function(){
-            console.log(this.props.PositionInfo);
-//            var style = {
-//                transform: this.state.transform,
-//                top: this.state.top,
-//                left: this.state.left
-//            }
+            var data = {};
+            if(this.props.PositionInfo){
+                data = {
+                    transform: this.props.PositionInfo.transform,
+                    left: this.props.PositionInfo.pos.x,
+                    top: this.props.PositionInfo.pos.y
+                }
+            }
             return(
-                <div className={this.state.nowState ? "photo-module on":"photo-module in"} onClick={this.clickHandle} style={this.props.PositionInfo} >
-                    <h3 className="inverse">{this.props.info["Inv"]}</h3> 
+                <div className="photo-module" onClick={this.clickHandle} style={data} >
+                    <h3 className="inverse">
+                        {this.props.info["Inv"]}
+                        <br/>
+                        <input type="text" value={this.state.Value}  ref="Input" onClick={this.stopProp} onChange={this.changeHandle}/>
+                        <br/>
+                        <div>{this.state.Value}</div>
+                    </h3> 
                     <img src={this.props.info["Url"]}></img>
-                    <h3>{this.props.info["Des"]}</h3>
+                    <h3>
+                        {this.props.info["Des"]}
+                    </h3>
                 </div> 
             );
         }
@@ -106,34 +144,138 @@
                 ImgPosInfo : []
             };
         },
-        clickHandle: function(){
-            this.setState({
-                transform: null,
-                nowState: !this.state.nowState
-            });
+        const:{
+            defaultTransform:"rotateZ(0deg) rotateY(0deg)",
+            centerPos:{
+                x: 0,
+                y: 0
+            },
+            leftScope:{
+                xMin: 0,
+                xMax: 0,
+            },
+            yMin: 0,
+            yMax: 0,
+            rightScope:{
+                xMin: 0,
+                xMax: 0,
+            }
         },
         componentDidMount: function(){
-            var mi = ReactDOM.findDOMNode(this.refs.Img);
+            var mi = ReactDOM.findDOMNode(this.refs.Img),
+                imgW = mi.offsetWidth,
+                imgH = mi.offsetHeight;
+            this.const.centerPos.x = stageW/2 - imgW/2;
+            this.const.centerPos.y = stageH/2 - imgH/2;
+            this.const.leftScope.xMin = - imgW/2;
+            this.const.leftScope.xMax = this.const.centerPos.x - imgW;
+            this.const.rightScope.xMin = this.const.centerPos.x + imgW;
+            this.const.rightScope.xMax = stageW - imgW/2;
+            this.const.yMin = - imgH/2;
+            this.const.yMax = stageH - imgH/2;
             
+            this.pull(this.allocArea(this.state.ImgPosInfo,0));
+            this.rearrage(0);
+        },
+        allocAreaLittle: function(elem){
+            if(getRandom(1,2) == 2 ? true : false){
+                elem.Rol = true;
+            }else{
+                elem.Rol = false;
+            }
+        },
+        allocArea: function(data,p = false){
+            var temp = [];
+            for(var i = 0,len = data.length;i < len; i++){
+                var elem = data[i];
+                if(i == p){
+                    continue;
+                }
+                this.allocAreaLittle(elem);
+                temp.push(elem);   
+            }
+            return temp;
+        },
+        pull: function(data){
+            for(var i = 0,len = data.length;i < len; i++){
+                var elem = data[i];
+                    elem.isCenter = false;
+                elem.isRotate = false;
+                if(elem.Rol){
+                    elem.pos = {
+                        x: getRandom(this.const.leftScope.xMin, this.const.leftScope.xMax),
+                        y: getRandom(this.const.yMin, this.const.yMax)
+                    };  
+                }else{
+                    elem.pos = {
+                        x: getRandom(this.const.rightScope.xMin, this.const.rightScope.xMax),
+                        y: getRandom(this.const.yMin, this.const.yMax)
+                    };
+                }
+                elem.transform = "rotateZ(" + getRandom(-40,40) + "deg) rotateY(0deg)";
+            }
+            this.setState({
+                ImgPosInfo: data
+            });
+        },
+        rearrage: function(centerIndex){
+            var temp = this.state.ImgPosInfo;
+            temp[centerIndex].pos = this.const.centerPos;
+            this.allocAreaLittle(temp[centerIndex]);
+            temp[centerIndex].isCenter = true;
+            temp[centerIndex].transform = this.const.defaultTransform;
+            this.setState({
+                ImgPosInfo: temp
+            });
+        },
+        componentWillMount: function(){
+            var temp = [];
+            PhotoInfo.forEach(function(elem, index){
+                var data = {
+                    transform: this.const.defaultTransform,
+                    pos:{
+                        left: 0,
+                        top: 0
+                    },
+                    isRotate: false,
+                    isCenter: false
+                }
+                temp = temp.concat(data);
+            }.bind(this));
+            this.setState({
+                ImgPosInfo: temp 
+            });
+        },
+        clickHandle: function(data){
+            var temp = this.state.ImgPosInfo;
+            console.log(temp[data].isCenter);
+            if(!temp[data].isCenter){
+                this.pull(temp);
+                this.rearrage(data);
+            }else{
+                temp[data].isRotate = !temp[data].isRotate;
+            }
+            var str = temp[data].transform;
+            str = str.split(" ",1);
+            str += " rotateY(" + (temp[data].isRotate?180:0) + "deg)";
+            temp[data].transform = str;
+            this.setState({
+                 ImgPosInfo: temp
+            });
         },
         render: function(){
             var msg = [];
-            console.log("执行啦");
-            PhotoInfo.forEach(function(elem,index){ 
-                this.state.ImgPosInfo[index] = {
-                    transform: null,
-                    left: getRandom(10,500),
-                    top: getRandom(10,200)
-                };
-                msg.push(<Photo info={elem} key={index} ref = "Img" PositionInfo={this.state.ImgPosInfo[index]} onClick={this.clickHandle}/>);
+            PhotoInfo.forEach(function(elem,index){
+                msg.push(<Photo info={elem} key={index} data-key={index} ref="Img" PositionInfo={this.state.ImgPosInfo[index]} clickFun={this.clickHandle}/>);
             }.bind(this));
             return(
                 <div>{msg}</div>
             );
         }
     });
-    function getRandom(a,b){;
-        return Math.floor(Math.random()*(b-a)) + a;
+
+    function getRandom(a,b){
+        return Math.round(Math.random()*(b-a)) + a;
     }
     ReactDOM.render(
         <PhotoWall/>,
