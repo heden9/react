@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/buy.css">
+</head>
+<body>
+    <div id="header">
+        <div class="wrapper">
+            <div id="main-header">
+                <div id="login" class="float">
+                    <a href="login.html">登录</a>
+                </div>
+                <h1 class="float">我的小店</h1>
+                <div id="cart" class="float">
+                    <span>购物车：$
+                        <span id="total-price">0.00</span>
+                        (
+                        <span id="total-count">0</span>
+                        件)
+                    </span>
+                    <!--<img src="img/cart.png" alt="">-->
+                </div>
+                <p>清空购物车</p>
+            </div>
+            <ul id="nav">
+                <li class="selected"><a href="index.html">首页</a></li>
+                <li id="makeup">
+                    <a href="">美妆商城</a>
+                    <div id="submenu">
+
+                    </div>
+                </li>
+                <li><a href="special-sale.html">特卖商场</a></li>
+                <li><a href="">新品上市</a></li>
+                <li><a href="">潮人推荐</a></li>
+                <li><a href="">进口免税店</a></li>
+            </ul>
+        </div>
+    </div>
+    <div id="center-page">
+        <div class="wrapper" id="content"></div>
+    </div>
+    <div id="footer">
+        <div class="wrapper">
+            <h3>我的小店</h3>
+            <h4>Copyright © 2017.我的小店</h4>
+        </div>
+    </div>
+    <script src="react-15.3.1/build/react.min.js"></script>
+    <script src="react-15.3.1/build/react-dom.min.js"></script>
+    <script src="react-15.3.1/browser.min.js"></script>
+    <script>
+    var shopping_info = [
+        {product_url:"img/c1.jpg",product_title:"科颜氏保湿精华爽肤水250ml",product_price:"160.00",max_num:"10",minPrice:"10.00"},
+        {product_url:"img/c1.jpg",product_title:"科颜氏保湿精华爽肤水250ml",product_price:"160.00",max_num:"10",minPrice:"10.00"},
+        {product_url:"img/c3.jpg",product_title:"科颜氏保湿精华爽肤水250ml",product_price:"100.00",max_num:"6",minPrice:"10.00"},
+        {product_url:"img/c3.jpg",product_title:"科颜氏保湿精华爽肤水250ml",product_price:"100.00",max_num:"6",minPrice:"10.00"},
+        {product_url:"img/c4.jpg",product_title:"科颜氏保湿精华爽肤水250ml",product_price:"230.00",max_num:"15",minPrice:"10.00"},
+        {product_url:"img/c4.jpg",product_title:"科颜氏保湿精华爽肤水250ml",product_price:"230.00",max_num:"15",minPrice:"10.00"},
+    ];
+    
+    </script>
+    <script type="text/babel">
+        var Close_btn = React.createClass({
+            destroyComponent: function(){
+                this.props.fun(this.props["data-key"]);
+            },
+            render: function(){
+                return(
+                    <button className="close-btn" onClick={this.destroyComponent}>X</button> 
+                );
+            }
+        });
+        var Shopping_list = React.createClass({
+            change: function(e, index){
+                this.props.myfun[1](e, this.props["data-key"]);
+            },
+            render: function(){
+                return(
+                    <li className="shopping-list">
+                        <div className="col-left">
+                            <img src={this.props.list_info.product_url} alt="亲，图碎了 TnT"/>
+                        </div>
+                        <Close_btn fun={this.props.myfun[0]} data-key={this.props["data-key"]}/>
+                        <div className="col-right">
+                            <h4>{this.props.list_info.product_title}</h4>
+                            <p>
+                                <h5><label>价格 </label>¥{this.props.list_info.product_price}<br/><label>库存 </label>{this.props.list_info.max_num}</h5>
+                                <label>数量 </label>
+                                <input type="number" value={this.props.list_info.product_num} min="0" max={this.props.list_info.max_num} onChange={this.change}/>
+                            </p>
+                            <p className="grey-msg">
+                                <span>优惠价格 ¥{this.props.list_info.minPrice}</span>
+                                <span style={{float:"right"}}>预计3-5天送达</span>
+                            </p>
+                        </div>
+                    </li>
+                );
+            } 
+        });
+        var Commit_menu = React.createClass({
+            render: function(){
+                var msg = [];
+                var sum_price = 0;
+                this.props.commit_info.forEach(function(elem, index){
+                    sum_price += elem.product_price * elem.product_num;
+                    msg.push(<h5 key={index}>{elem.product_title} x{elem.product_num <= 0 ? 0 : elem.product_num}</h5>);
+                }.bind(this));
+                return(
+                    <div className="commit-menu">
+                        {msg}
+                        <span>{sum_price}</span>
+                    </div>
+                );
+            }
+        });
+        var Shopping_menu = React.createClass({
+            getInitialState: function(){
+                return{
+                    Product:[]  
+                };
+            },
+            componentWillMount: function(){
+                var temp = this.state.Product;
+                for(var i = 0, len = shopping_info.length; i < len; i ++){
+                    var elem = shopping_info[i];
+                    var data = {
+                        product_title: elem.product_title,
+                        product_price: elem.product_price,
+                        minPrice: elem.minPrice,
+                        max_num: elem.max_num,
+                        product_url: elem.product_url,
+                        product_num: 0,
+                    };
+                    temp = temp.concat(data);
+                }
+                this.setState({
+                   Product: temp 
+                },function(){
+                    console.log(this.state.Product);
+                });
+            },
+            add: function(e, index){
+                var temp = this.state.Product;
+                var val = e.target.value;
+                if(val > parseInt(temp[index].max_num)){
+                    temp[index].product_num = temp[index].max_num;
+                }else
+                    temp[index].product_num = val;
+                this.setState({
+                    Product: temp
+                });
+            },
+            del: function(index){
+                var temp = this.state.Product;
+                temp = temp.slice(0,index).concat(temp.slice(index+1,temp.length));
+                this.setState({
+                    Product: temp 
+                });
+            },
+            render: function(){
+                var list = [];
+                this.state.Product.forEach(function(elem, index){
+                    list.push(<Shopping_list key={index} data-key={index} list_info={elem} myfun={[this.del,this.add]}/>)
+                }.bind(this));
+                return(
+                    <div>
+                        <ul className="shopping-menu">{list}</ul>
+                        <Commit_menu commit_info={this.state.Product}/>
+                    </div>
+                );
+            } 
+        });
+        ReactDOM.render(
+            <Shopping_menu/>,
+            document.getElementById("content")
+        );
+    </script>
+</body>
+</html>
