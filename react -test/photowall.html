@@ -33,13 +33,7 @@
             text-align: center;
             background: #eee;
             transform-style: preserve-3d;
-            transition: all 1s ease-out;
-        }
-        .on{
-            transform: rotateY(0deg);
-        }
-        .in{
-            transform: rotateY(180deg);
+            transition: all .6s ease;
         }
         .photo-module img{
             width: 200px;
@@ -54,6 +48,36 @@
             top: 0;
 /*            backface-visibility: hidden;*/
             transform: rotateY(180deg) translateZ(1px);
+        }
+        .btn{
+            cursor: pointer;
+            vertical-align: middle;
+            margin-left: 8px;
+            width: 12px;
+            height: 12px;
+            text-align: center;
+            color: rgba(0,0,0,.5);
+            line-height: 20px;
+            border-radius: 50%;
+            background-color: rgba(0,0,0,.5);
+            transform-style: preserve-3d;
+            display: inline-block;
+            transition: all .6s ease;
+        }
+        .btn-click{
+            color: white;
+            width: 20px;
+            height: 20px;
+        }
+        .btn-group{
+            width: 210px;
+            height: 30px;
+            line-height: 30px;
+            overflow: hidden;
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
         }
     </style>
 </head>
@@ -91,7 +115,8 @@
     var Photo = React.createClass({
         getInitialState: function(){
             return{
-                Value: 0  
+                ValueFront: this.props.info["Des"],
+                ValueInverse: this.props.info["Inv"]
             };
         },
         componentDidMount: function(){
@@ -104,7 +129,7 @@
         },
         changeHandle: function(event){
             this.setState({
-               Value: event.target.value
+               ValueFront: event.target.value
             },function(){
                 console.log(this.refs.Input.value);
             });
@@ -124,15 +149,15 @@
             return(
                 <div className="photo-module" onClick={this.clickHandle} style={data} >
                     <h3 className="inverse">
-                        {this.props.info["Inv"]}
+                        {this.state.ValueInverse}
                         <br/>
-                        <input type="text" value={this.state.Value}  ref="Input" onClick={this.stopProp} onChange={this.changeHandle}/>
+                        <input type="text" value={this.state.ValueFront}  ref="Input" onClick={this.stopProp} onChange={this.changeHandle}/>
                         <br/>
-                        <div>{this.state.Value}</div>
+                        <div>{this.state.ValueFront}</div>
                     </h3> 
                     <img src={this.props.info["Url"]}></img>
                     <h3>
-                        {this.props.info["Des"]}
+                        {this.state.ValueFront}
                     </h3>
                 </div> 
             );
@@ -174,8 +199,7 @@
             this.const.yMin = - imgH/2;
             this.const.yMax = stageH - imgH/2;
             
-            this.pull(this.allocArea(this.state.ImgPosInfo,0));
-            this.rearrage(0);
+            this.pull(this.allocArea(this.state.ImgPosInfo,0),0);
         },
         allocAreaLittle: function(elem){
             if(getRandom(1,2) == 2 ? true : false){
@@ -196,10 +220,17 @@
             }
             return temp;
         },
-        pull: function(data){
+        pull: function(data,centerIndex){
             for(var i = 0,len = data.length;i < len; i++){
                 var elem = data[i];
-                    elem.isCenter = false;
+                if(i == centerIndex){
+                    elem.pos = this.const.centerPos;
+                    this.allocAreaLittle(elem);
+                    elem.isCenter = true;
+                    elem.transform = this.const.defaultTransform;
+                    continue;
+                }
+                elem.isCenter = false;
                 elem.isRotate = false;
                 if(elem.Rol){
                     elem.pos = {
@@ -214,18 +245,9 @@
                 }
                 elem.transform = "rotateZ(" + getRandom(-40,40) + "deg) rotateY(0deg)";
             }
+            
             this.setState({
                 ImgPosInfo: data
-            });
-        },
-        rearrage: function(centerIndex){
-            var temp = this.state.ImgPosInfo;
-            temp[centerIndex].pos = this.const.centerPos;
-            this.allocAreaLittle(temp[centerIndex]);
-            temp[centerIndex].isCenter = true;
-            temp[centerIndex].transform = this.const.defaultTransform;
-            this.setState({
-                ImgPosInfo: temp
             });
         },
         componentWillMount: function(){
@@ -248,10 +270,8 @@
         },
         clickHandle: function(data){
             var temp = this.state.ImgPosInfo;
-            console.log(temp[data].isCenter);
             if(!temp[data].isCenter){
-                this.pull(temp);
-                this.rearrage(data);
+                this.pull(temp,data);
             }else{
                 temp[data].isRotate = !temp[data].isRotate;
             }
@@ -264,16 +284,38 @@
             });
         },
         render: function(){
-            var msg = [];
+            var ImgCtr = [];
+            var BtnCtr = [];
             PhotoInfo.forEach(function(elem,index){
-                msg.push(<Photo info={elem} key={index} data-key={index} ref="Img" PositionInfo={this.state.ImgPosInfo[index]} clickFun={this.clickHandle}/>);
+                ImgCtr.push(<Photo info={elem} key={index} data-key={index} ref="Img" PositionInfo={this.state.ImgPosInfo[index]} clickFun={this.clickHandle}/>);
+                BtnCtr.push(<Btn key={index} data-key={index} clickFun={this.clickHandle} PositionInfo={this.state.ImgPosInfo[index]}/>);
             }.bind(this));
             return(
-                <div>{msg}</div>
+                <div>
+                    <div>{ImgCtr}</div>
+                    <div className="btn-group">{BtnCtr}</div>
+                </div>
             );
         }
     });
-
+    var Btn = React.createClass({
+        clickHandle: function(){
+            this.props.clickFun(this.props["data-key"]);
+        },
+        render: function(){
+            var str = this.props.PositionInfo.transform;
+            str = str.split(" ",2)[1];
+            var data = {
+                transform: str  
+            };
+            console.log(str);
+            return(
+                <div className={this.props.PositionInfo.isCenter ? "btn btn-click" : "btn"} onClick={this.clickHandle} style={data}>
+                    {this.props.PositionInfo.isCenter ? this.props["data-key"] + 1 : "" }
+                </div>
+            );
+        }
+    });
     function getRandom(a,b){
         return Math.round(Math.random()*(b-a)) + a;
     }
